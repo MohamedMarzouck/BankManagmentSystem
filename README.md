@@ -8,7 +8,7 @@ A lightweight Console-based Banking & User Management System built with **C++** 
 ## ✨ Features
 - 👥 **Client Management**: Full CRUD operations for client accounts.
 - 💸 **Transactions**: Deposit, Withdraw, Transfer & Total Balance calculation.
-- 📜 **Audit Log**: Tracks all money transfers with detailed timestamps.
+- 📜 **Audit Log**: Tracks all money transfers with detailed timestamps, and search transfer log.
 - 🔐 **Access Control**: User login system with fine-grained **Bitwise Permissions**.
 - 📁 **Data Persistence**: Automatic saving to flat text files (`.txt`).
 
