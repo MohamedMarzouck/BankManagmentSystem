@@ -23,7 +23,5 @@ A lightweight Console-based Banking & User Management System built with **C++** 
 ## 🚀 Quick Start
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/mohamedmarzouk77/bank-management-system.git](https://github.com/mohamedmarzouk77/bank-management-system.git)
-   git clone [https://github.com/MohamedMarzouck/BankManagmentSystem.git](https://github.com/MohamedMarzouck/BankManagmentSystem.git)
-
+   
    git clone https://github.com/MohamedMarzouck/BankManagmentSystem.git
