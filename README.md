@@ -1,30 +1,29 @@
 
-# Bank Management System 🏦
+# 🏦 Bank Management System (C++)
 
-A simple and efficient Console-based Bank Management System built in **C++** using **Functional Programming** concepts.
+A lightweight Console-based Banking & User Management System built with **C++** using File Handling and Bitwise Permissions.
 
 ---
 
-## 🌟 Key Features & Architecture:
-
-- 👤 **Client Management:** Add, update, and delete client accounts.
-- 📁 **Data Persistence:** Automatically reads and saves all client data to local files (`BankClient.txt`).
-
-- **No Circular Calls:** Menu navigation is designed using standard `do-while` loops to prevent infinite recursion and stack overflow errors.
-- **Data Persistence:** Complete client record management (Deposit, Withdraw, Update, Delete) saved directly to external text files
+## ✨ Features
+- 👥 **Client Management**: Full CRUD operations for client accounts.
+- 💸 **Transactions**: Deposit, Withdraw, Transfer & Total Balance calculation.
+- 📜 **Audit Log**: Tracks all money transfers with detailed timestamps.
+- 🔐 **Access Control**: User login system with fine-grained **Bitwise Permissions**.
+- 📁 **Data Persistence**: Automatic saving to flat text files (`.txt`).
 
 ---
 
 ## 🛠️ Built With
-
-* **Language:** C++
-* **Paradigm:** Functional Programming
-* **Storage:** Text-based file storage (`.txt`)
+- **C++11** (Vectors, Structs, Enums, File I/O)
+- **Bitwise Operations** for authorization masks
 
 ---
 
-## 🚀 How to Run
-
-1. **Clone the repository:**
+## 🚀 Quick Start
+1. Clone the repository:
    ```bash
+   git clone [https://github.com/mohamedmarzouk77/bank-management-system.git](https://github.com/mohamedmarzouk77/bank-management-system.git)
    git clone [https://github.com/MohamedMarzouck/BankManagmentSystem.git](https://github.com/MohamedMarzouck/BankManagmentSystem.git)
+
+   git clone https://github.com/MohamedMarzouck/BankManagmentSystem.git
