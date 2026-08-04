@@ -1,3 +1,7 @@
+// Add stUser And Permissions;
+// Add TransferBalances;
+// Add Transferlog And TransferLog Screen;
+
 #pragma warning(disable : 4996)
 
 #include <iostream>
@@ -23,38 +27,45 @@ struct stClient
     bool MarkToDelete = false;
 };
 
-struct stUser
-{
-    string UserName;
-    string Password;
-    int permissions = 0;
-    bool MarkToDelete = false;
-};
-
 struct stTransferLogRecord
 {
     string DateTime;
     string SourceAccNumber;
+    float SourceBalanceBefor = 0;
+    float SourceBalanceAfter = 0;
+
     string DestinationAccNumber;
+    float DestinationBalanceBefor = 0;
+    float DestinationBalanceAfter = 0;
+
+    float Amount = 0;
     string UserName;
-    float  Amount = 0;
-    float  SourceBalanceBefor = 0;
-    float  SourceBalanceAfter = 0;
-    float  DestinationBalanceBefor = 0;
-    float  DestinationBalanceAfter = 0;
 };
 
-enum enMainMenuOption { eClientList = 1, eAddClient = 2, eFindClient = 3, eUpdateClient = 4, eDeleteClient = 5,
-                        eTransactionScreen = 6,eManageUsers = 7, eLogOut = 8};
+enum enMainMenuOption
+{
+    eClientList = 1,
+    eAddClient = 2,
+    eFindClient = 3,
+    eUpdateClient = 4,
+    eDeleteClient = 5,
+    eTransactionScreen = 6,
+    eManageUsers = 7,
+    eLogOut = 8
+};
 
-enum enTransactionMenuOption { eDeposit = 1, eWithdraw, eTotalBalance, eTransferBalance, eTransferLog, eSearchTransferLog, eMainMenu };
+enum enTransactionMenuOption
+{
+    eDeposit = 1,
+    eWithdraw,
+    eTotalBalance,
+    eTransferBalance,
+    eTransferLog,
+    eSearchTransferLog,
+    eMainMenu
+};
 
-enum enUsersMenuOption { UsersList = 1, AddUser = 2, FindUser = 3, UpdateUser = 4, DeleteUsser = 5, MainMenu = 6 };
-
-enum enUserPermissions { All = -1, pUsersList = 1, pNewUser = 2, pFindUser = 4, pUpdateUser = 8,
-                         pDeleteUser = 16, pUserTransaction = 32, pManageUsers = 64 };
-
-
+struct stUser;
 stUser CurrentUser;
 
 // --------------------;
@@ -64,14 +75,13 @@ void LogIn();
 void MainMenuScreen();
 void UsersScreen();
 void TransactionMenuScreen();
-vector<stClient> LoadClientsDataFromFile(const string&);
-vector<stUser> LoadUsersDataFromFile(const string& FileName);
-bool ClientExistsByAccountNumber(const string& AccountNumber, const string& FileName);
-void SaveTransferLogToFile(const stTransferLogRecord& , const string& );
+vector<stClient> LoadClientsDataFromFile(const string &);
+vector<stUser> LoadUsersDataFromFile(const string &FileName);
+bool ClientExistsByAccountNumber(const string &AccountNumber, const string &FileName);
+void SaveTransferLogToFile(const stTransferLogRecord &, const string &);
 string GetSystemDateTimeString();
 
-
-vector<string> _Split(const string& str, const string& Sepetator = " || ")
+vector<string> _Split(const string &str, const string &Sepetator = " || ")
 {
     size_t pos = 0, prev = 0;
     vector<string> vData;
@@ -122,6 +132,9 @@ void AccessDeniedMsg()
     system("pause>0");
 }
 
+// ANCHOR - ---------------------------------------------;
+// ANCHOR - ------------ ⁡⁢⁣⁣𝘼𝙘𝙘𝙚𝙨𝙨𝙋𝙚𝙧𝙢𝙞𝙨𝙨𝙞𝙤𝙣𝙨⁡ ---------------;
+// ANCHOR - ---------------------------------------------;
 bool CheckAccessPermissions(enUserPermissions Permission)
 {
     if (CurrentUser.permissions == enUserPermissions::All)
@@ -133,7 +146,7 @@ bool CheckAccessPermissions(enUserPermissions Permission)
     return false;
 }
 
-string ConvertClientDataToLine(const stClient& Client)
+string ConvertClientDataToLine(const stClient &Client)
 {
     string ClientData = "";
 
@@ -146,12 +159,13 @@ string ConvertClientDataToLine(const stClient& Client)
     return ClientData;
 }
 
-stClient ConvertLineToClientRecord(const string& Line)
+stClient ConvertLineToClientRecord(const string &Line)
 {
     stClient Client;
     vector<string> vClient = _Split(Line);
 
-    if (vClient.size() < 5) return Client;
+    if (vClient.size() < 5)
+        return Client;
 
     Client.AccNumber = vClient[0];
     Client.PinCode = vClient[1];
@@ -162,7 +176,7 @@ stClient ConvertLineToClientRecord(const string& Line)
     return Client;
 }
 
-vector<stClient> LoadClientsDataFromFile(const string& FileName)
+vector<stClient> LoadClientsDataFromFile(const string &FileName)
 {
     fstream myFile;
     vector<stClient> vClients;
@@ -176,7 +190,7 @@ vector<stClient> LoadClientsDataFromFile(const string& FileName)
         while (getline(myFile, Line))
         {
             Client = ConvertLineToClientRecord(Line);
-            if (!Client.AccNumber.empty())
+            if (!Client.AccNumber.empty()) // TODO - *******************;
                 vClients.push_back(Client);
         }
         myFile.close();
@@ -185,14 +199,14 @@ vector<stClient> LoadClientsDataFromFile(const string& FileName)
     return vClients;
 }
 
-void SaveAllClientsInFile(const vector<stClient>& vClient, const string& FileName)
+void SaveAllClientsInFile(const vector<stClient> &vClient, const string &FileName)
 {
     fstream myFile;
     myFile.open(FileName, ios::out);
 
     if (myFile.is_open())
     {
-        for (const stClient& C : vClient)
+        for (const stClient &C : vClient)
             if (!C.MarkToDelete)
                 myFile << ConvertClientDataToLine(C) << endl;
 
@@ -200,7 +214,7 @@ void SaveAllClientsInFile(const vector<stClient>& vClient, const string& FileNam
     }
 }
 
-bool ClientExistsByAccountNumber(const string& AccountNumber, const string& FileName)
+bool ClientExistsByAccountNumber(const string &AccountNumber, const string &FileName)
 {
     fstream myFile;
     myFile.open(FileName, ios::in);
@@ -254,7 +268,7 @@ stClient ReadNewClient()
     return Client;
 }
 
-void SaveClientDataToFile(const string& Line, const string& FileName)
+void SaveClientDataToFile(const string &Line, const string &FileName)
 {
     fstream myFile;
     myFile.open(ClientsFile, ios::out | ios::app);
@@ -283,6 +297,9 @@ void AddNewClients()
     } while (toupper(Answer) == 'Y');
 }
 
+// ANCHOR - ------------;
+// ANCHOR - -⁡⁢⁣⁣𝙉𝙚𝙬𝘾𝙡𝙞𝙚𝙣𝙩𝙨⁡-;
+// ANCHOR - ------------;
 void AddNewClientsScreen()
 {
     if (!CheckAccessPermissions(enUserPermissions::pNewUser))
@@ -299,7 +316,7 @@ void AddNewClientsScreen()
     AddNewClients();
 }
 
-void PrintClientLine(const stClient& Client)
+void PrintClientLine(const stClient &Client)
 {
     cout << "| " << setw(11) << left << Client.AccNumber;
     cout << "| " << setw(10) << left << Client.PinCode;
@@ -308,6 +325,9 @@ void PrintClientLine(const stClient& Client)
     cout << "| " << setw(12) << left << Client.AccBalance << " |\n";
 }
 
+// ANCHOR - ------------;
+// ANCHOR - ⁡⁢⁣⁣𝘾𝙡𝙞𝙚𝙣𝙩𝙎𝙘𝙧𝙚𝙚𝙣⁡-;
+// ANCHOR - ------------;
 void AllClientsScreen()
 {
     if (!CheckAccessPermissions(enUserPermissions::pUsersList))
@@ -335,7 +355,7 @@ void AllClientsScreen()
         cout << "\t\t\tThe Clients System Is Empty!\n";
     else
     {
-        for (const stClient& C : vClients)
+        for (const stClient &C : vClients)
             PrintClientLine(C);
     }
     cout << "--------------------------------------------------------------------------------------------------\n";
@@ -346,10 +366,11 @@ string ReadAccNumber()
     string AccNumber;
     cout << "Please Enter The Account Number: ";
     cin >> AccNumber;
+
     return AccNumber;
 }
 
-void PrintClientRecord(const stClient& Client)
+void PrintClientRecord(const stClient &Client)
 {
     cout << "\n---------------------------------------------";
     cout << "\n Account Number  :   " << Client.AccNumber;
@@ -360,9 +381,9 @@ void PrintClientRecord(const stClient& Client)
     cout << "\n---------------------------------------------\n";
 }
 
-bool FindClientByAccNumber(const vector<stClient>& vClients, const string& AccountNumber, stClient& Client)
+bool FindClientByAccNumber(const vector<stClient> &vClients, const string &AccountNumber, stClient &Client)
 {
-    for (const stClient& C : vClients)
+    for (const stClient &C : vClients)
         if (C.AccNumber == AccountNumber)
         {
             Client = C;
@@ -371,6 +392,9 @@ bool FindClientByAccNumber(const vector<stClient>& vClients, const string& Accou
     return false;
 }
 
+// ANCHOR - ----------;
+// ANCHOR - ⁡⁢⁣⁣‍‍𝙁𝙞𝙣𝙙𝘾𝙡𝙞𝙚𝙣𝙩⁡-;
+// ANCHOR - ----------;
 void FindClientScreen()
 {
     if (!CheckAccessPermissions(enUserPermissions::pFindUser))
@@ -394,7 +418,7 @@ void FindClientScreen()
         cout << "\nThe Client With Account Number [" << AccNumber << "] Is Not Found!\n";
 }
 
-void UpdateClientRecord(const string& AccountNumber, stClient& Client)
+void UpdateClientRecord(const string &AccountNumber, stClient &Client)
 {
     Client.AccNumber = AccountNumber;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -412,6 +436,9 @@ void UpdateClientRecord(const string& AccountNumber, stClient& Client)
     cin >> Client.AccBalance;
 }
 
+// ANCHOR - -----------------------;
+// ANCHOR - ----- ⁡⁢⁣⁣𝙐𝙥𝙙𝙖𝙩𝙚𝘾𝙡𝙞𝙚𝙣𝙩⁡ ----;
+// ANCHOR - -----------------------;
 void UpdateClientScreenByAccNumber()
 {
     if (!CheckAccessPermissions(enUserPermissions::pUpdateUser))
@@ -429,10 +456,13 @@ void UpdateClientScreenByAccNumber()
     vector<stClient> vClients = LoadClientsDataFromFile(ClientsFile);
     stClient Client;
 
-    for (stClient& C : vClients)
+    bool found = false;
+
+    for (stClient &C : vClients)
     {
         if (C.AccNumber == AccountNumber)
         {
+            found = true;
             PrintClientRecord(Client);
 
             char Answer = 'N';
@@ -450,12 +480,15 @@ void UpdateClientScreenByAccNumber()
 
             break;
         }
-        else
-            cout << "\nThe Client With Account Number [" << AccountNumber << "] Is Not Found!\n";
     }
-}
-            
 
+    if (!found)
+        cout << "\nThe Client With Account Number [" << AccountNumber << "] Is Not Found!\n";
+}
+
+// ANCHOR - ------------------------;
+// ANCHOR - ----- ⁡⁢⁣⁣𝘿𝙚𝙡𝙚𝙩𝙚𝘾𝙡𝙞𝙚𝙣𝙩⁡ ------;
+// ANCHOR - ------------------------;
 void DeleteClientScreenByAccNumber()
 {
     if (!CheckAccessPermissions(enUserPermissions::pDeleteUser))
@@ -473,10 +506,13 @@ void DeleteClientScreenByAccNumber()
     string AccountNumber = ReadAccNumber();
     stClient Client;
 
-    for (stClient& C : vClients)
+    bool found = false;
+
+    for (stClient &C : vClients)
     {
         if (C.AccNumber == AccountNumber)
         {
+            found = true;
             PrintClientRecord(Client);
 
             char Answer = 'N';
@@ -490,19 +526,19 @@ void DeleteClientScreenByAccNumber()
                 cout << "\nThe client deleted successfully.\n";
             }
             else
-                cout << "\nUpdate Operation Cancelled.\n";
+                cout << "\nDelete Operation Cancelled.\n";
 
             break;
         }
-        else
-            cout << "\nThe Client With Account Number [" << AccountNumber << "] Is Not Found!\n";
     }
+
+    if (!found)
+        cout << "\nThe Client With Account Number [" << AccountNumber << "] Is Not Found!\n";
 }
 
-bool DepositBalanceToClientByAccountNumber(vector<stClient>& vClients, const string& AccountNumber, double Amount)
+bool DepositBalanceToClientByAccountNumber(vector<stClient> &vClients, const string &AccountNumber, double Amount)
 {
-    for (stClient& C : vClients)
-    {
+    for (stClient &C : vClients)
         if (C.AccNumber == AccountNumber)
         {
             C.AccBalance += Amount;
@@ -510,10 +546,13 @@ bool DepositBalanceToClientByAccountNumber(vector<stClient>& vClients, const str
             cout << "\n\nDone Successfully. New balance is: " << C.AccBalance;
             return true;
         }
-    }
+
     return false;
 }
 
+// ANCHOR - --------;
+// ANCHOR - ⁡⁢⁣⁣𝘿𝙚𝙥𝙤𝙨𝙞𝙩-⁡;
+// ANCHOR - --------;
 void DepositScreen()
 {
     system("cls");
@@ -525,7 +564,7 @@ void DepositScreen()
     string AccountNumber = ReadAccNumber();
     stClient Client;
 
-    while (!FindClientByAccNumber(vClients, AccountNumber, Client))
+    while (!FindClientByAccNumber(vClients, AccountNumber, Client)) // TODO - stClient* &Client;
     {
         cout << "\nClient with [" << AccountNumber << "] does not exist.\n";
         AccountNumber = ReadAccNumber();
@@ -548,6 +587,9 @@ void DepositScreen()
         cout << "\nDeposit Operation Cancelled.\n";
 }
 
+// ANCHOR - ---------;
+// ANCHOR - ⁡⁢⁣⁣𝙒𝙞𝙩𝙝𝙙𝙧𝙖𝙬⁡;
+// ANCHOR - ---------;
 void WithdrawScreen()
 {
     system("cls");
@@ -569,13 +611,13 @@ void WithdrawScreen()
     PrintClientRecord(Client);
 
     double Amount = 0;
-    cout << "\nEnter The Amount Withdraw:   ";
+    cout << "\nEnter The Withdraw Amount :   ";
     cin >> Amount;
 
     while (Amount > Client.AccBalance)
     {
         cout << "\nThe Withdraw Amount Exceeds Your Balance! Your Balance [ " << Client.AccBalance << " ]\n";
-        cout << "Enter The Amount Withdraw:   ";
+        cout << "Enter The Withdraw Amount :   ";
         cin >> Amount;
     }
 
@@ -584,19 +626,23 @@ void WithdrawScreen()
     cin >> Answer;
 
     if (toupper(Answer) == 'Y')
-        DepositBalanceToClientByAccountNumber(vClients, AccountNumber, -Amount);
+        DepositBalanceToClientByAccountNumber(vClients, AccountNumber, -Amount); // TODO - *******************;
     else
         cout << "\nWithdraw Operation Cancelled.\n";
 }
 
-double GetTotalBalance(const vector<stClient>& vClients)
+double GetTotalBalance(const vector<stClient> &vClients)
 {
     double TotalBalance = 0;
-    for (const stClient& C : vClients)
+    for (const stClient &C : vClients)
         TotalBalance += C.AccBalance;
+
     return TotalBalance;
 }
 
+// ANCHOR - -----------------;
+// ANCHOR - - ⁡⁢⁣⁣𝙏𝙤𝙩𝙖𝙡𝘽𝙖𝙡𝙖𝙣𝙘𝙚⁡ --;
+// ANCHOR - -----------------;
 void AllClientBalanceScreen()
 {
     system("cls");
@@ -616,7 +662,7 @@ void AllClientBalanceScreen()
         cout << "\t\t\tThe Clients System Is Empty!\n";
     else
     {
-        for (const stClient& C : vClients)
+        for (const stClient &C : vClients)
         {
             cout << "| " << setw(15) << left << C.AccNumber;
             cout << "| " << setw(40) << left << C.ClientName;
@@ -628,10 +674,10 @@ void AllClientBalanceScreen()
     cout << "--------------------------------------------------------------------------------------\n";
 }
 
-
-//-------------------------------------------- Transfer ----------------------------------------------;
-//----------------------------------------------------------------------------------------------------;
-void TransferAccNumber(const vector<stClient>& vClients, stClient& FromClient, stClient& ToClient)
+// ANCHOR - --------------------------------------------------------------------------------------;
+// ANCHOR - ----------------------------------- ⁡⁢⁣⁢𝙏𝙧𝙖𝙣𝙨𝙛𝙚𝙧⁡ ------------------------------------------;
+// ANCHOR - --------------------------------------------------------------------------------------;
+void TransferAccNumber(const vector<stClient> &vClients, stClient &FromClient, stClient &ToClient)
 {
     cout << "\nEnter Account Number To Transfer From:   ";
     cin >> FromClient.AccNumber;
@@ -646,7 +692,6 @@ void TransferAccNumber(const vector<stClient>& vClients, stClient& FromClient, s
     cout << "\nName           :    " << FromClient.ClientName;
     cout << "\nAccount Balance:    " << FromClient.AccBalance;
     cout << "\n------------------------------------------";
-
 
     cout << "\n\nEnter Account Number To Transfer To:   ";
     cin >> ToClient.AccNumber;
@@ -666,7 +711,7 @@ void TransferAccNumber(const vector<stClient>& vClients, stClient& FromClient, s
     cout << "\n------------------------------------------";
 }
 
-float GetTransferBalance(const stClient& FromClient)
+float GetTransferBalance(const stClient &FromClient)
 {
     if (FromClient.AccBalance < 10)
     {
@@ -677,7 +722,7 @@ float GetTransferBalance(const stClient& FromClient)
     float Amount;
     cout << "\n\nEnter Transfer Amount Geater Than 10:   ";
     cin >> Amount;
-    while (Amount < 10 || Amount > FromClient.AccBalance)                   //! while (true);
+    while (Amount < 10 || Amount > FromClient.AccBalance) //! while (true);
     {
         cout << "\nInvalid Amount!, Your Available Balance Is: [ " << FromClient.AccBalance << " ]. \n";
         cout << "\nEnter Another Amount Between [ 10, " << FromClient.AccBalance << " ]:   ";
@@ -687,6 +732,9 @@ float GetTransferBalance(const stClient& FromClient)
     return Amount;
 }
 
+// ANCHOR - ---------;
+// ANCHOR - ⁡⁢⁣⁢𝙏𝙧𝙖𝙣𝙨𝙛𝙚𝙧⁡-;
+// ANCHOR - ---------;
 void TransferScreen()
 {
     system("cls");
@@ -700,7 +748,8 @@ void TransferScreen()
     TransferAccNumber(vClients, FromClient, ToClient);
     float Amount = GetTransferBalance(FromClient);
 
-    if (Amount == 0) return;
+    if (Amount == 0)
+        return;
 
     short UpdatedCount = 0;
     char Confirm = 'N';
@@ -709,14 +758,13 @@ void TransferScreen()
 
     if (toupper(Confirm) == 'Y')
     {
-        for (stClient& C : vClients)
+        for (stClient &C : vClients)
         {
             if (C.AccNumber == FromClient.AccNumber)
             {
                 C.AccBalance -= Amount;
                 FromClient.AccBalance = C.AccBalance;
                 UpdatedCount++;
-
             }
             else if (C.AccNumber == ToClient.AccNumber)
             {
@@ -725,7 +773,7 @@ void TransferScreen()
                 UpdatedCount++;
             }
 
-            if (UpdatedCount == 2)
+            if (UpdatedCount == 2) // TODO - *******************;
                 break;
         }
 
@@ -734,16 +782,13 @@ void TransferScreen()
         cout << "\nTransfer Done Successfully!\n";
         cout << "New Balance For [" << FromClient.AccNumber << "] Is: " << FromClient.AccBalance << "\n";
     }
-
     else
         cout << "\nThe Operation Cancelled.\n";
-
 
     if (UpdatedCount == 2)
     {
         stTransferLogRecord LogRecord;
 
-        LogRecord.Amount = Amount;
         LogRecord.DateTime = GetSystemDateTimeString();
         LogRecord.SourceAccNumber = FromClient.AccNumber;
         LogRecord.SourceBalanceBefor = FromClient.AccBalance + Amount;
@@ -752,18 +797,21 @@ void TransferScreen()
         LogRecord.DestinationAccNumber = ToClient.AccNumber;
         LogRecord.DestinationBalanceBefor = ToClient.AccBalance - Amount;
         LogRecord.DestinationBalanceAfter = ToClient.AccBalance;
+
+        LogRecord.Amount = Amount;
         LogRecord.UserName = CurrentUser.UserName;
 
         SaveTransferLogToFile(LogRecord, "TransferLog.txt");
     }
 }
 
-
-//-------- TransferLog --------;
+// ANCHOR - ------------⁡--------;
+// ANCHOR - ---⁡⁢⁣⁢- 𝘛𝘳𝘢𝘯𝘴𝘧𝘦𝘳𝘓𝘰𝘨⁡ ----;
+// ANCHOR - ------------⁡--------;
 string GetSystemDateTimeString()
 {
     time_t t = time(0);
-    tm* now = localtime(&t);
+    tm *now = localtime(&t);
 
     char buffer[80];
     strftime(buffer, sizeof(buffer), "%d/%m/%Y - %H:%M:%S", now);
@@ -771,7 +819,7 @@ string GetSystemDateTimeString()
     return string(buffer);
 }
 
-string ConvertTransferLogToLine(const stTransferLogRecord& LogRecord, const string& Seperator)
+string ConvertTransferLogToLine(const stTransferLogRecord &LogRecord, const string &Seperator)
 {
     string LogLine = "";
 
@@ -790,7 +838,7 @@ string ConvertTransferLogToLine(const stTransferLogRecord& LogRecord, const stri
     return LogLine;
 }
 
-void SaveTransferLogToFile(const stTransferLogRecord& LogRecord, const string& LogFileName = "TransferLog.txt")
+void SaveTransferLogToFile(const stTransferLogRecord &LogRecord, const string &LogFileName = "TransferLog.txt")
 {
     fstream MyFile;
     MyFile.open(LogFileName, ios::out | ios::app);
@@ -804,13 +852,13 @@ void SaveTransferLogToFile(const stTransferLogRecord& LogRecord, const string& L
     }
 }
 
-stTransferLogRecord ConvertLineToTransferLogRecord(const string& Line, const string& Seperator)
-
+stTransferLogRecord ConvertLineToTransferLogRecord(const string &Line, const string &Seperator)
 {
     stTransferLogRecord LogRecord;
     vector<string> vLogData = _Split(Line, Seperator);
 
-    if (vLogData.size() < 9) return LogRecord;
+    if (vLogData.size() < 9)
+        return LogRecord;
 
     LogRecord.DateTime = vLogData[0];
     LogRecord.SourceAccNumber = vLogData[1];
@@ -827,7 +875,7 @@ stTransferLogRecord ConvertLineToTransferLogRecord(const string& Line, const str
     return LogRecord;
 }
 
-vector<stTransferLogRecord> LoadTransferLogDataFromFile(const string& LogFileName = "TransferLog.txt")
+vector<stTransferLogRecord> LoadTransferLogDataFromFile(const string &LogFileName = "TransferLog.txt")
 {
     vector<stTransferLogRecord> vTransferLogRecords;
     fstream MyFile;
@@ -839,7 +887,7 @@ vector<stTransferLogRecord> LoadTransferLogDataFromFile(const string& LogFileNam
         stTransferLogRecord LogRecord;
 
         while (getline(MyFile, Line))
-            if (Line != "")
+            if (!Line.empty())
             {
                 LogRecord = ConvertLineToTransferLogRecord(Line, Seperator);
                 vTransferLogRecords.push_back(LogRecord);
@@ -851,7 +899,8 @@ vector<stTransferLogRecord> LoadTransferLogDataFromFile(const string& LogFileNam
     return vTransferLogRecords;
 }
 
-void PrintTransferLogRecordLine(const stTransferLogRecord& Record) {
+void PrintTransferLogRecordLine(const stTransferLogRecord &Record)
+{
     cout << "| " << left << setw(23) << Record.DateTime;
     cout << "| " << left << setw(8) << Record.SourceAccNumber;
     cout << "| " << left << setw(10) << Record.SourceBalanceBefor;
@@ -860,12 +909,13 @@ void PrintTransferLogRecordLine(const stTransferLogRecord& Record) {
     cout << "| " << left << setw(8) << Record.DestinationAccNumber;
     cout << "| " << left << setw(10) << Record.DestinationBalanceBefor;
     cout << "| " << left << setw(10) << Record.DestinationBalanceAfter;
+
     cout << "| " << left << setw(10) << Record.Amount;
     cout << "| " << left << setw(10) << Record.UserName << " |\n";
 }
 
-//--- TrancferLogScreen ---;
-void ShowTransferLogScreen() 
+// ANCHOR - ⁢𝙏𝙧𝙖𝙣𝙘𝙛𝙚𝙧𝙇𝙤𝙜𝙎𝙘𝙧𝙚𝙚𝙣⁡;
+void ShowTransferLogScreen()
 {
     system("cls");
     vector<stTransferLogRecord> vLogs = LoadTransferLogDataFromFile();
@@ -890,23 +940,22 @@ void ShowTransferLogScreen()
 
     if (vLogs.empty())
         cout << "\t\t\t\tNo Transfers Available In System!\n";
-    
-    else 
-        for (const stTransferLogRecord& Record : vLogs) 
+
+    else
+        for (const stTransferLogRecord &Record : vLogs)
             PrintTransferLogRecordLine(Record);
 
     cout << "=======================================================================================================================\n";
 }
 //-------------------------------------------------------------------------------------------------------------------------------------;
 
-vector<stTransferLogRecord> FilterTransferLogsByAccountNumber(const vector<stTransferLogRecord>& vAllLogs, string AccountNumber)
+vector<stTransferLogRecord> FilterTransferLogsByAccountNumber(const vector<stTransferLogRecord> &vAllLogs, string AccountNumber)
 {
     vector<stTransferLogRecord> vFilteredLogs;
 
-    for (const stTransferLogRecord& Record : vAllLogs)
+    for (const stTransferLogRecord &Record : vAllLogs)
         if (Record.SourceAccNumber == AccountNumber || Record.DestinationAccNumber == AccountNumber)
             vFilteredLogs.push_back(Record);
-
 
     return vFilteredLogs;
 }
@@ -925,7 +974,7 @@ void ShowTransferLogByAccountScreen()
     vector<stTransferLogRecord> vAllLogs = LoadTransferLogDataFromFile("TransferLog.txt");
     vector<stTransferLogRecord> vAccountLogs = FilterTransferLogsByAccountNumber(vAllLogs, AccountNumber);
 
-    string Title = "\tTransfer Log for Account [" + AccountNumber + "]:   (" + to_string(vAccountLogs.size()) + ") Record(s).";
+    string Title = "\t\t\tTransfer Log for Account [" + AccountNumber + "]:   (" + to_string(vAccountLogs.size()) + ") Record(s).";
 
     cout << "\n\t\t\t-------------------------------------------------------\n";
     cout << Title;
@@ -948,7 +997,7 @@ void ShowTransferLogByAccountScreen()
         cout << "\t\tNo Transfers Found For Account [" << AccountNumber << "]!\n";
 
     else
-        for (const stTransferLogRecord& Record : vAccountLogs)
+        for (const stTransferLogRecord &Record : vAccountLogs)
         {
             PrintTransferLogRecordLine(Record);
             cout << endl;
@@ -959,6 +1008,36 @@ void ShowTransferLogByAccountScreen()
 //-------------------------------------------------------------------------------------------------------------------------------------;
 //-------------------------------------------------------------------------------------------------------------------------------------;
 //-------------------------------------------------------------------------------------------------------------------------------------;
+
+struct stUser
+{
+    string UserName;
+    string Password;
+    int permissions = 0;
+    bool MarkToDelete = false;
+};
+
+enum enUsersMenuOption
+{
+    UsersList = 1,
+    AddUser = 2,
+    FindUser = 3,
+    UpdateUser = 4,
+    DeleteUsser = 5,
+    MainMenu = 6
+};
+
+enum enUserPermissions
+{
+    All = -1,
+    pUsersList = 1,
+    pNewUser = 2,
+    pFindUser = 4,
+    pUpdateUser = 8,
+    pDeleteUser = 16,
+    pUserTransaction = 32,
+    pManageUsers = 64
+};
 
 short ReadPermissions()
 {
@@ -1009,7 +1088,7 @@ short ReadPermissions()
     return Permission;
 }
 
-string ConvertUserDataToLine(const stUser& User)
+string ConvertUserDataToLine(const stUser &User)
 {
     string UserData = "";
     UserData += User.UserName + Seperator;
@@ -1018,12 +1097,13 @@ string ConvertUserDataToLine(const stUser& User)
     return UserData;
 }
 
-stUser ConvertLineToUserRecord(const string& Line)
+stUser ConvertLineToUserRecord(const string &Line)
 {
     stUser User;
     vector<string> vUser = _Split(Line);
 
-    if (vUser.size() < 3) return User;
+    if (vUser.size() < 3)
+        return User;
 
     User.UserName = vUser[0];
     User.Password = vUser[1];
@@ -1032,7 +1112,7 @@ stUser ConvertLineToUserRecord(const string& Line)
     return User;
 }
 
-void SaveUserDataToFile(const string& Line, const string& FileName)
+void SaveUserDataToFile(const string &Line, const string &FileName)
 {
     fstream myFile;
     myFile.open(FileName, ios::out | ios::app);
@@ -1044,7 +1124,7 @@ void SaveUserDataToFile(const string& Line, const string& FileName)
     }
 }
 
-vector<stUser> LoadUsersDataFromFile(const string& FileName)
+vector<stUser> LoadUsersDataFromFile(const string &FileName)
 {
     fstream myFile;
     vector<stUser> vUsers;
@@ -1066,25 +1146,24 @@ vector<stUser> LoadUsersDataFromFile(const string& FileName)
     return vUsers;
 }
 
-void SaveAllUsersInFile(const vector<stUser>& vUsers, const string& FileName)
+void SaveAllUsersInFile(const vector<stUser> &vUsers, const string &FileName)
 {
     fstream myFile;
     myFile.open(FileName, ios::out);
 
     if (myFile.is_open())
     {
-        for (const stUser& U : vUsers)
+        for (const stUser &U : vUsers)
             if (!U.MarkToDelete)
                 myFile << ConvertUserDataToLine(U) << endl;
-
 
         myFile.close();
     }
 }
 
-bool FindUserByUserName(const vector<stUser>& vUsers, const string& UserN, stUser& User)
+bool FindUserByUserName(const vector<stUser> &vUsers, const string &UserN, stUser &User)
 {
-    for (const stUser& U : vUsers)
+    for (const stUser &U : vUsers)
         if (U.UserName == UserN)
         {
             User = U;
@@ -1093,12 +1172,12 @@ bool FindUserByUserName(const vector<stUser>& vUsers, const string& UserN, stUse
     return false;
 }
 
-bool UserExistsByUserName(const string& UserN, const string& FileName) {
+bool UserExistsByUserName(const string &UserN, const string &FileName)
+{
     vector<stUser> vUsers = LoadUsersDataFromFile(FileName);
     stUser User;
 
-
-    return FindUserByUserName(vUsers, UserN, User);//******;
+    return FindUserByUserName(vUsers, UserN, User); // TODO - *******************;
 }
 
 stUser ReadNewUser()
@@ -1122,6 +1201,9 @@ stUser ReadNewUser()
     return User;
 }
 
+// ANCHOR - -------;
+// ANCHOR - ⁡⁢⁣⁢𝙉𝙚𝙬𝙐𝙨𝙚𝙧⁡;
+// ANCHOR - -------;
 void AddNewUsers()
 {
     char Answer = 'N';
@@ -1141,13 +1223,13 @@ void AddNewUsers()
     } while (toupper(Answer) == 'Y');
 }
 
-void PrintUserLine(const stUser& User)
+void PrintUserLine(const stUser &User)
 {
     cout << "| " << setw(20) << left << User.UserName;
     cout << "| " << setw(20) << left << User.Password;
     cout << "| " << setw(10) << left << User.permissions << " |\n";
 }
-
+// ANCHOR - ⁡⁢⁣⁢𝘼𝙡𝙡𝙐𝙨𝙚𝙧𝙨⁡ -⁡;
 void AllUsersScreen()
 {
     system("cls");
@@ -1167,13 +1249,13 @@ void AllUsersScreen()
         cout << "\t\t\tThe Users System Is Empty!\n";
     else
     {
-        for (const stUser& U : vUsers)
+        for (const stUser &U : vUsers)
             PrintUserLine(U);
     }
     cout << "--------------------------------------------------------------------------\n";
 }
 
-void PrintUserRecord(const stUser& User)
+void PrintUserRecord(const stUser &User)
 {
     cout << "\n---------------------------------------------";
     cout << "\n Username :   " << User.UserName;
@@ -1190,6 +1272,7 @@ string ReadUserName()
     return UserN;
 }
 
+// ANCHOR - ⁡⁢⁣⁢𝙁𝙞𝙣𝙙𝙐𝙨𝙚𝙧⁡-;
 void FindUserScreen()
 {
     system("cls");
@@ -1207,7 +1290,7 @@ void FindUserScreen()
         cout << "\nThe User With Username [" << UserN << "] Is Not Found!\n";
 }
 
-void UpdateUserRecord(const string& UserN, stUser& User)
+void UpdateUserRecord(const string &UserN, stUser &User)
 {
     User.UserName = UserN;
 
@@ -1218,6 +1301,7 @@ void UpdateUserRecord(const string& UserN, stUser& User)
     User.permissions = ReadPermissions();
 }
 
+// ANCHOR - ⁡⁢⁣⁢𝙐𝙥𝙙𝙖𝙩𝙚𝙐𝙨𝙚𝙧⁡ ;
 void UpdateUserScreen()
 {
     system("cls");
@@ -1229,11 +1313,14 @@ void UpdateUserScreen()
     vector<stUser> vUsers = LoadUsersDataFromFile(UsersFile);
     stUser User;
 
+    bool found = false;
+
     char Answer = 'N';
-        
-    for (stUser& U : vUsers)
+
+    for (stUser &U : vUsers)
         if (U.UserName == UserN)
         {
+            found = true;
             PrintUserRecord(User);
 
             cout << "\nAre You Sure You Want To Update This User? (Y/N):   ";
@@ -1250,10 +1337,12 @@ void UpdateUserScreen()
 
             break;
         }
-        else
-            cout << "\nThe User With Username [" << UserN << "] Is Not Found!\n";
+
+    if (!found)
+        cout << "\nThe User With Username [" << UserN << "] Is Not Found!\n";
 }
 
+// ANCHOR - ⁡⁢⁣⁢𝘿𝙚𝙡𝙚𝙩𝙚𝙐𝙨𝙚𝙧⁡ ;
 void DeleteUserScreen()
 {
     system("cls");
@@ -1265,17 +1354,19 @@ void DeleteUserScreen()
     vector<stUser> vUsers = LoadUsersDataFromFile(UsersFile);
     stUser User;
 
-    if (UserN == "Admin")
+    if (UserN == "Admin") // TODO - *******************;
     {
         cout << "\nYou Cannot Delete The System Admin Account!\n";
         return;
     }
 
     char Answer = 'N';
+    bool found = false;
 
-    for (stUser& U : vUsers)
+    for (stUser &U : vUsers)
         if (U.UserName == UserN)
         {
+            found = true;
             PrintUserRecord(User);
 
             cout << "\nAre You Sure You Want To Delete This User? (Y/N):   ";
@@ -1292,10 +1383,10 @@ void DeleteUserScreen()
 
             break;
         }
-        else
-            cout << "\nThe User With Username [" << UserN << "] Is Not Found!\n";
-}
 
+    if (!found)
+        cout << "\nThe User With Username [" << UserN << "] Is Not Found!\n";
+}
 
 void GoBackMainMenu()
 {
@@ -1314,7 +1405,6 @@ void GoBackToUserMenuScreen()
     cout << "\nEnter Any Key To Go to User Menu Screen...  \n";
     system("pause>0");
 }
-
 
 void PerformTransactionMenuOption(enTransactionMenuOption Option)
 {
@@ -1437,7 +1527,7 @@ void UsersScreen()
     } while (Option != enUsersMenuOption::MainMenu);
 }
 
-//---- Main Menu ----;
+//---- Main Menu ---;
 void MainMenuScreen()
 {
     system("cls");
@@ -1490,17 +1580,18 @@ void PerformMainMenuOption(enMainMenuOption Option)
     }
 }
 
-bool LoadUserInfo(string UserName, string Password) 
+// TODO - ----------- LoadUserInfo ----------------;
+bool LoadUserInfo(string UserName, string Password)
 {
     vector<stUser> vUsers = LoadUsersDataFromFile(UsersFile);
 
-    for (stUser& U : vUsers) 
-        if (U.UserName == UserName && U.Password == Password) 
+    for (stUser &U : vUsers)
+        if (U.UserName == UserName && U.Password == Password)
         {
             CurrentUser = U;
             return true;
         }
-    
+
     return false;
 }
 
@@ -1529,10 +1620,9 @@ void LogIn()
     } while (LoginFailed);
 }
 
-
 int main()
 {
-    while (true)   // Infinite loop to keep the program running even after logout;
+    while (true) // Infinite loop to keep the program running even after logout;
     {
         LogIn();
 
@@ -1548,6 +1638,3 @@ int main()
 
     return 0;
 }
-
-
-
