@@ -27,6 +27,14 @@ struct stClient
     bool MarkToDelete = false;
 };
 
+struct stUser
+{
+    string UserName;
+    string Password;
+    int permissions = 0;
+    bool MarkToDelete = false;
+};
+
 struct stTransferLogRecord
 {
     string DateTime;
@@ -63,6 +71,18 @@ enum enTransactionMenuOption
     eTransferLog,
     eSearchTransferLog,
     eMainMenu
+};
+
+enum enUserPermissions
+{
+    All = -1,
+    pUsersList = 1,
+    pNewUser = 2,
+    pFindUser = 4,
+    pUpdateUser = 8,
+    pDeleteUser = 16,
+    pUserTransaction = 32,
+    pManageUsers = 64
 };
 
 struct stUser;
@@ -389,6 +409,7 @@ bool FindClientByAccNumber(const vector<stClient> &vClients, const string &Accou
             Client = C;
             return true;
         }
+
     return false;
 }
 
@@ -536,14 +557,26 @@ void DeleteClientScreenByAccNumber()
         cout << "\nThe Client With Account Number [" << AccountNumber << "] Is Not Found!\n";
 }
 
-bool DepositBalanceToClientByAccountNumber(vector<stClient> &vClients, const string &AccountNumber, double Amount)
+// bool DepositBalanceToClientByAccountNumber(vector<stClient>& vClients, const string& AccountNumber, double Amount)
+//{
+//     for (stClient& C : vClients)
+//         if (C.AccNumber == AccountNumber)
+//         {
+//             C.AccBalance += Amount;
+//             SaveAllClientsInFile(vClients, ClientsFile);
+//             cout << "\n\nDone Successfully. New balance is: " << C.AccBalance;
+//             return true;
+//         }
+//
+//     return false;
+// }
+
+bool FindClientByPointer(vector<stClient> &vClients, const string &AccountNumber, stClient *&ClientPtr)
 {
     for (stClient &C : vClients)
         if (C.AccNumber == AccountNumber)
         {
-            C.AccBalance += Amount;
-            SaveAllClientsInFile(vClients, ClientsFile);
-            cout << "\n\nDone Successfully. New balance is: " << C.AccBalance;
+            ClientPtr = &C;
             return true;
         }
 
@@ -562,16 +595,16 @@ void DepositScreen()
 
     vector<stClient> vClients = LoadClientsDataFromFile(ClientsFile);
     string AccountNumber = ReadAccNumber();
-    stClient Client;
+    stClient *Clientptr;
 
-    while (!FindClientByAccNumber(vClients, AccountNumber, Client)) // TODO - stClient* &Client;
+    while (!FindClientByPointer(vClients, AccountNumber, Clientptr))
     {
         cout << "\nClient with [" << AccountNumber << "] does not exist.\n";
         AccountNumber = ReadAccNumber();
     }
 
     cout << "\nThe Following Are Client Details: \n";
-    PrintClientRecord(Client);
+    PrintClientRecord(*Clientptr);
 
     double Amount = 0;
     cout << "\nEnter The Amount Deposit:   ";
@@ -582,7 +615,12 @@ void DepositScreen()
     cin >> Answer;
 
     if (toupper(Answer) == 'Y')
-        DepositBalanceToClientByAccountNumber(vClients, AccountNumber, Amount);
+    {
+        Clientptr->AccBalance += Amount;
+        SaveAllClientsInFile(vClients, ClientsFile);
+        cout << "\n\nDone Successfully. New balance is: " << Clientptr->AccBalance << endl;
+        // DepositBalanceToClientByAccountNumber(vClients, AccountNumber, Amount);
+    }
     else
         cout << "\nDeposit Operation Cancelled.\n";
 }
@@ -599,24 +637,24 @@ void WithdrawScreen()
 
     vector<stClient> vClients = LoadClientsDataFromFile(ClientsFile);
     string AccountNumber = ReadAccNumber();
-    stClient Client;
+    stClient *Clientptr;
 
-    while (!FindClientByAccNumber(vClients, AccountNumber, Client))
+    while (!FindClientByPointer(vClients, AccountNumber, Clientptr))
     {
         cout << "\nClient with [" << AccountNumber << "] does not exist.\n";
         AccountNumber = ReadAccNumber();
     }
 
     cout << "\nThe Following Are Client Details: \n";
-    PrintClientRecord(Client);
+    PrintClientRecord(*Clientptr);
 
     double Amount = 0;
     cout << "\nEnter The Withdraw Amount :   ";
     cin >> Amount;
 
-    while (Amount > Client.AccBalance)
+    while (Amount > Clientptr->AccBalance)
     {
-        cout << "\nThe Withdraw Amount Exceeds Your Balance! Your Balance [ " << Client.AccBalance << " ]\n";
+        cout << "\nThe Withdraw Amount Exceeds Your Balance! Your Balance [ " << Clientptr->AccBalance << " ]\n";
         cout << "Enter The Withdraw Amount :   ";
         cin >> Amount;
     }
@@ -626,7 +664,12 @@ void WithdrawScreen()
     cin >> Answer;
 
     if (toupper(Answer) == 'Y')
-        DepositBalanceToClientByAccountNumber(vClients, AccountNumber, -Amount); // TODO - *******************;
+    {
+        Clientptr->AccBalance -= Amount;
+        SaveAllClientsInFile(vClients, ClientsFile);
+        cout << "\n\nDone Successfully. New balance is: " << Clientptr->AccBalance << endl;
+        // DepositBalanceToClientByAccountNumber(vClients, AccountNumber, -Amount);
+    }
     else
         cout << "\nWithdraw Operation Cancelled.\n";
 }
@@ -1009,14 +1052,6 @@ void ShowTransferLogByAccountScreen()
 //-------------------------------------------------------------------------------------------------------------------------------------;
 //-------------------------------------------------------------------------------------------------------------------------------------;
 
-struct stUser
-{
-    string UserName;
-    string Password;
-    int permissions = 0;
-    bool MarkToDelete = false;
-};
-
 enum enUsersMenuOption
 {
     UsersList = 1,
@@ -1025,18 +1060,6 @@ enum enUsersMenuOption
     UpdateUser = 4,
     DeleteUsser = 5,
     MainMenu = 6
-};
-
-enum enUserPermissions
-{
-    All = -1,
-    pUsersList = 1,
-    pNewUser = 2,
-    pFindUser = 4,
-    pUpdateUser = 8,
-    pDeleteUser = 16,
-    pUserTransaction = 32,
-    pManageUsers = 64
 };
 
 short ReadPermissions()
